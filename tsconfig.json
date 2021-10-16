@@ -1,0 +1,13 @@
+{
+  "extends": "@quasar/app/tsconfig-preset",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "skipLibCheck": false,
+    "noImplicitAny": false
+  },
+  "paths": {
+    "@/*": [
+      "src/*"
+    ]
+  },
+}
