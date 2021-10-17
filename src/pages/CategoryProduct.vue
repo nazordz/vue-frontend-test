@@ -1,11 +1,11 @@
 <template>
   <div class="q-ma-md">
     <div class="row q-my-md q-mx-sm">
-      <q-btn @click="showFormAdd" label="Create user" no-caps color="primary"></q-btn>
+      <q-btn @click="showFormAdd" label="Create Category" no-caps color="primary"></q-btn>
     </div>
     <q-table
       ref="mainTable"
-      :onRequest="getUsers"
+      :onRequest="getCategoryProduct"
       :columns="columns"
       :rows="rows"
     >
@@ -24,46 +24,24 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { date, LooseDictionary, useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
+import { CategoryProduct } from 'src/components/models'
 import { defineComponent, defineAsyncComponent, onMounted, ref } from 'vue'
-import { User } from 'src/components/models'
-const FormUser = defineAsyncComponent(() => import('components/dialogs/FormUser.vue'))
-
-export enum gender {
-  MAN = 'MAN',
-  WOMAN = 'WOMAN'
-}
+const FormCategoryProduct = defineAsyncComponent(() => import('components/dialogs/FormCategoryProduct.vue'))
 
 const columns = [
   {
-    field: 'first_name',
-    label: 'First Name',
-    name: 'firstName'
+    field: 'name',
+    label: 'Category Name',
+    name: 'name'
   },
   {
-    field: 'last_name',
-    label: 'Last Name',
-    name: 'lastName'
-  },
-  {
-    field: 'email',
-    label: 'Email',
-    name: 'email'
-  },
-  {
-    field: 'gender',
-    label: 'Gender',
-    name: 'gender',
-    format: (g: string) => g == gender.MAN ? 'Pria' : 'Wanita'
-  },
-  {
-    field: 'birth_date',
-    label: 'Birth Date',
-    name: 'birth_date',
-    format: (val: string) => date.formatDate(new Date(val), 'DD MMM YYYY')
+    field: 'description',
+    label: 'Description',
+    name: 'description'
   },
   {
     field: 'created_at',
-    label: 'Created at',
+    label: 'created at',
     name: 'created_at',
     format: (val: string) => date.formatDate(new Date(val), 'DD MMM YYYY')
   },
@@ -74,17 +52,18 @@ const columns = [
   }
 ]
 export default defineComponent({
-  name: 'User',
+  name: 'CategoryProduct',
   setup() {
     const mainTable = ref()
-    const rows = ref<User[]>([])
+    const rows = ref<CategoryProduct[]>([])
     const $q = useQuasar()
-    async function getUsers() {
-      const req = await api.get<User[]>('users')
+
+    async function getCategoryProduct() {
+      const req = await api.get<CategoryProduct[]>('category-products')
       rows.value = req.data
     }
     onMounted(async () => {
-      await getUsers()
+      await getCategoryProduct()
     })
     function deleteRow(id: string) {
       $q.dialog({
@@ -92,7 +71,7 @@ export default defineComponent({
         message: 'are you sure?',
         cancel: true,
       }).onOk(async () => {
-        await api.delete('users', {
+        await api.delete('category-products', {
           data: { id }
         })
         mainTable.value.requestServerInteraction()
@@ -104,10 +83,10 @@ export default defineComponent({
     }
     function showFormAdd() {
       $q.dialog({
-        component: FormUser,
+        component: FormCategoryProduct,
         componentProps: {
           id: null,
-          user: {}
+          categoryProduct: {}
         }
       }).onOk(() => {
         mainTable.value.requestServerInteraction()
@@ -115,10 +94,10 @@ export default defineComponent({
     }
     function clickRow(row: LooseDictionary) {
       $q.dialog({
-        component: FormUser,
+        component: FormCategoryProduct,
         componentProps: {
           id: row.id,
-          user: row
+          categoryProduct: row
         }
       }).onOk(() => {
         mainTable.value.requestServerInteraction()
@@ -129,7 +108,7 @@ export default defineComponent({
       rows,
       clickRow,
       mainTable,
-      getUsers,
+      getCategoryProduct,
       showFormAdd,
       deleteRow
     }

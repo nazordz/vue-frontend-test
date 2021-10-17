@@ -29,19 +29,9 @@
 
 import { useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
+import { User } from 'src/components/models';
 import { defineComponent, reactive } from 'vue'
 import { useRouter } from 'vue-router';
-
-export interface User {
-  id: string
-  first_name: string
-  last_name: string
-  email: string
-  birth_date: string
-  gender: string
-  created_at: string
-  updated_at: string
-}
 
 interface LoginResponse {
   token: string
@@ -65,13 +55,18 @@ export default defineComponent({
         })
         localStorage.setItem('token', req.data.token)
         localStorage.setItem('user', JSON.stringify(req.data.user))
-        await router.push('/')
+        $q.notify({
+          color: 'dark',
+          position: 'top',
+          message: 'Logged in'
+        })
+        await router.replace('/')
       } catch (error) {
         console.log(error);
         $q.notify({
-          caption: 'dark',
+          color: 'dark',
           position: 'top',
-          message: 'Gagal Login, Periksa kembali'
+          message: 'Login Failed'
         })
       }
     }

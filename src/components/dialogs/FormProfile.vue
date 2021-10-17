@@ -1,6 +1,6 @@
 <template>
-  <q-dialog class="" @before-show="fillForms" ref="dialogRef">
-    <q-card class="q-dialog-plugin" v-if="user" style="width: 700px; max-width: 80vw;">
+  <q-dialog class="" @before-show="getUser" ref="dialogRef">
+    <q-card class="q-dialog-plugin" v-if="id" style="width: 700px; max-width: 80vw;">
       <q-card-section>
         Form User
       </q-card-section>
@@ -21,9 +21,13 @@
               </q-icon>
             </template>
           </q-input>
+          <div class="q-py-sm rounded-borders">
+            <span class="text-grey-7">Gender:</span>
+            <q-option-group inline v-model="form.gender" :options="genderOptions" />
+          </div>
           <q-input label="Email" type="email" v-model="form.email"></q-input>
-          <q-input v-if="!id" label="Password" type="password" v-model="form.password"></q-input>
-          <q-option-group inline v-model="form.gender" :options="genderOptions" />
+          <q-checkbox label="Change password?" v-model="form.changePassword"></q-checkbox>
+          <q-input v-if="form.changePassword" label="New Password" type="password" v-model="form.password"></q-input>
         </q-form>
       </q-card-section>
       <!-- buttons example -->
@@ -36,11 +40,10 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
 import { User } from 'src/components/models'
-import { defineComponent, PropType, reactive, ref } from 'vue'
+import { defineComponent, reactive, ref } from 'vue'
 
 interface Form {
   first_name: string
@@ -48,49 +51,46 @@ interface Form {
   gender: string
   birth_date: string
   email: string
+  changePassword: boolean
   password?: string
 }
 
 export default defineComponent({
-  props: {
-    id: Number,
-    user: {
-      type: Object as PropType<User>
-    }
-  },
   emits: [
     ...useDialogPluginComponent.emits
   ],
 
-  setup(props) {
+  setup() {
     const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
     const $q = useQuasar()
+    const id = ref('')
     const form = reactive({
       first_name: '',
       last_name: '',
       gender: '',
       birth_date: '',
       email: '',
+      changePassword: false,
       password: ''
     })
-    function fillForms() {
-      if (props.user) {
-        form.first_name = props.user.first_name
-        form.last_name = props.user.last_name
-        form.birth_date = props.user.birth_date
-        form.gender = props.user.gender
-        form.email = props.user.email
+    async function getUser() {
+      const { data: userLocal } = await api.get<User>('/user')
+      if (userLocal) {
+        id.value = userLocal.id
+        form.first_name = userLocal.first_name
+        form.last_name = userLocal.last_name
+        form.birth_date = userLocal.birth_date
+        form.gender = userLocal.gender
+        form.email = userLocal.email
       }
     }
     async function save() {
-      const params: Form = form
+      const params = <Form> form
       try {
-        if (props.id) {
+        if (!form.changePassword) {
           delete params.password
-          await api.put(`users/${props.id}`, form)
-        } else {
-          await api.post('users', form)
         }
+        await api.post(`/user/${id.value}`, params)
         $q.notify({
           message: 'Save Successed',
           position: 'top',
@@ -112,7 +112,8 @@ export default defineComponent({
     ])
 
     return {
-      fillForms,
+      id,
+      getUser,
       form,
       dialogRef,
       onDialogHide,
@@ -123,8 +124,6 @@ export default defineComponent({
   }
 })
 </script>
-
-
 <style>
 
 </style>

@@ -20,6 +20,9 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', component: () => import('pages/Index.vue') },
       { path: 'users', component: () => import('pages/User.vue') },
+      { path: 'category-products', component: () => import('pages/CategoryProduct.vue') },
+      { path: 'products', component: () => import('pages/Product.vue') },
+      { path: 'transactions', component: () => import('pages/Transaction.vue') },
     ],
     meta: {
       requiresAuth: true

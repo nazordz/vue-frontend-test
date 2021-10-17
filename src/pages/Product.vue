@@ -1,14 +1,19 @@
 <template>
   <div class="q-ma-md">
     <div class="row q-my-md q-mx-sm">
-      <q-btn @click="showFormAdd" label="Create user" no-caps color="primary"></q-btn>
+      <q-btn @click="showFormAdd" label="Create Product" no-caps color="primary"></q-btn>
     </div>
     <q-table
       ref="mainTable"
-      :onRequest="getUsers"
+      :onRequest="getProduct"
       :columns="columns"
       :rows="rows"
     >
+      <template v-slot:body-cell-image="props">
+        <q-td :props="props">
+          <q-img :src="props.value" width="120px"></q-img>
+        </q-td>
+      </template>
       <template v-slot:body-cell-action="props">
         <q-td :props="props">
           <q-btn icon="edit" class="q-mr-sm" size="sm" round color="green" @click="clickRow(props.row)"></q-btn>
@@ -24,46 +29,45 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { date, LooseDictionary, useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
+import { CategoryProduct, Product } from 'src/components/models'
 import { defineComponent, defineAsyncComponent, onMounted, ref } from 'vue'
-import { User } from 'src/components/models'
-const FormUser = defineAsyncComponent(() => import('components/dialogs/FormUser.vue'))
+const FormProduct = defineAsyncComponent(() => import('components/dialogs/FormProduct.vue'))
 
-export enum gender {
-  MAN = 'MAN',
-  WOMAN = 'WOMAN'
+export function showImage(img: string): string {
+  return `${process.env.BASE_URL || ''}${img}`
 }
 
 const columns = [
   {
-    field: 'first_name',
-    label: 'First Name',
-    name: 'firstName'
+    field: 'category_product',
+    label: 'Category',
+    name: 'category',
+    format: (row: CategoryProduct) => row.name
   },
   {
-    field: 'last_name',
-    label: 'Last Name',
-    name: 'lastName'
+    field: 'name',
+    label: 'Name',
+    name: 'name'
   },
   {
-    field: 'email',
-    label: 'Email',
-    name: 'email'
+    field: 'description',
+    label: 'Description',
+    name: 'description'
   },
   {
-    field: 'gender',
-    label: 'Gender',
-    name: 'gender',
-    format: (g: string) => g == gender.MAN ? 'Pria' : 'Wanita'
+    field: 'image',
+    label: 'Image',
+    name: 'image',
+    format: (row: string) => showImage(row)
   },
   {
-    field: 'birth_date',
-    label: 'Birth Date',
-    name: 'birth_date',
-    format: (val: string) => date.formatDate(new Date(val), 'DD MMM YYYY')
+    field: 'stock',
+    label: 'Stock',
+    name: 'stock',
   },
   {
     field: 'created_at',
-    label: 'Created at',
+    label: 'created at',
     name: 'created_at',
     format: (val: string) => date.formatDate(new Date(val), 'DD MMM YYYY')
   },
@@ -74,17 +78,18 @@ const columns = [
   }
 ]
 export default defineComponent({
-  name: 'User',
+  name: 'Product',
   setup() {
     const mainTable = ref()
-    const rows = ref<User[]>([])
+    const rows = ref<Product[]>([])
     const $q = useQuasar()
-    async function getUsers() {
-      const req = await api.get<User[]>('users')
+
+    async function getProduct() {
+      const req = await api.get<Product[]>('products')
       rows.value = req.data
     }
     onMounted(async () => {
-      await getUsers()
+      await getProduct()
     })
     function deleteRow(id: string) {
       $q.dialog({
@@ -92,7 +97,7 @@ export default defineComponent({
         message: 'are you sure?',
         cancel: true,
       }).onOk(async () => {
-        await api.delete('users', {
+        await api.delete('products', {
           data: { id }
         })
         mainTable.value.requestServerInteraction()
@@ -104,10 +109,10 @@ export default defineComponent({
     }
     function showFormAdd() {
       $q.dialog({
-        component: FormUser,
+        component: FormProduct,
         componentProps: {
           id: null,
-          user: {}
+          product: {}
         }
       }).onOk(() => {
         mainTable.value.requestServerInteraction()
@@ -115,10 +120,11 @@ export default defineComponent({
     }
     function clickRow(row: LooseDictionary) {
       $q.dialog({
-        component: FormUser,
+        component: FormProduct,
         componentProps: {
           id: row.id,
-          user: row
+          product: row,
+          previewImage: row.image
         }
       }).onOk(() => {
         mainTable.value.requestServerInteraction()
@@ -129,9 +135,9 @@ export default defineComponent({
       rows,
       clickRow,
       mainTable,
-      getUsers,
+      getProduct,
       showFormAdd,
-      deleteRow
+      deleteRow,
     }
   }
 })
