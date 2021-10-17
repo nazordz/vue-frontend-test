@@ -10,7 +10,7 @@
           <q-input v-model="form.name" label="Name Product" />
           <q-input v-model="form.description" label="Description" />
           <q-input v-model="form.stock" label="Stock" type="number" />
-          <q-file v-model="form.image" label="Image" accept=".png, .jpg, .webp">
+          <q-file v-model="form.image" label="Image" accept=".png, .jpg, .webp, .jpeg, .gif">
             <template v-slot:append>
               <q-icon name="attach_file" />
             </template>
@@ -44,7 +44,7 @@ interface Form {
   description: string
   stock: number
   category_product: string | any
-  image: File
+  image: null | File
 }
 
 export default defineComponent({
@@ -68,7 +68,8 @@ export default defineComponent({
       description: '',
       stock: 0,
       category_product: '',
-      image: new File([''], '')
+      // image: new File([''], '')
+      image: null
     })
     async function getCategories() {
       try {
@@ -104,8 +105,8 @@ export default defineComponent({
       formData.append('name', form.name)
       formData.append('description', form.description)
       formData.append('stock', String(form.stock))
-      if (form.image.name != '') {
-        formData.append('image', form.image)
+      if (form.image?.name != '') {
+        formData.append('image', form.image as unknown as string)
       }
       formData.append('category_product_id', form.category_product['value'])
       try {
