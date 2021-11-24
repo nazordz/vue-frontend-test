@@ -31,8 +31,6 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
 import { showImage } from 'src/pages/Product.vue'
@@ -68,7 +66,6 @@ export default defineComponent({
       description: '',
       stock: 0,
       category_product: '',
-      // image: new File([''], '')
       image: null
     })
     async function getCategories() {
