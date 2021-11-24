@@ -80,7 +80,11 @@ export default defineComponent({
     const rows = ref<User[]>([])
     const $q = useQuasar()
     async function getUsers() {
-      const req = await api.get<User[]>('users')
+      const req = await api.get<User[]>('users', {
+        params: {
+          fields: 'first_name, last_name, email, gender, birth_date, created_at, id'
+        }
+      })
       rows.value = req.data
     }
     onMounted(async () => {

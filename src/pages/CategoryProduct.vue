@@ -59,7 +59,11 @@ export default defineComponent({
     const $q = useQuasar()
 
     async function getCategoryProduct() {
-      const req = await api.get<CategoryProduct[]>('category-products')
+      const req = await api.get<CategoryProduct[]>('category-products', {
+        params: {
+          fields: 'id, name, description'
+        }
+      })
       rows.value = req.data
     }
     onMounted(async () => {
