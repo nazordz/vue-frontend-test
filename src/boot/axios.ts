@@ -24,6 +24,19 @@ api.interceptors.request.use(
     return config
   }
 )
+api.interceptors.response.use(
+  response => {
+    return response
+  },
+  async function(error) {
+    if (error.response.status == 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.href = '/'
+    }
+    return Promise.reject(error)
+  }
+)
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
