@@ -29,7 +29,7 @@
                   v-slot="scope">
                   <q-input
                     type="number"
-                    hint="Cannot higher than stock product it self"
+                    :hint="form.type == 'OUT' ? 'Cannot higher than stock product it self' : ''"
                     v-model="scope.value"
                     @keyup.enter="scope.set"
                     :error="!limitStock(scope.value, props.row)"
